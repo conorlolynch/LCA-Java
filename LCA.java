@@ -187,13 +187,4 @@ public class LCA {
 		
 		return -1;
 	}
-	
-	
-	
-	public static void main(String[] args) {
-		BT bt = new BT(12);
-		bt.put(13);
-		
-		System.out.println(bt.root.key);
-	}
 }
