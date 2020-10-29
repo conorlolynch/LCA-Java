@@ -14,11 +14,83 @@ class LCATest {
     public void testConstructor()
     {
       new LCA();
+      new DAG();
+    }
+    
+    
+    @Test
+    void testDAG() {
+    	
+    	// Test creating a DAG object with no nodes 
+    	DAG dag = new DAG();
+    	assertEquals("Test creating a DAG object with no nodes",0, dag.node_map.size());
+    	assertEquals("Test creating a DAG object with no nodes",0, dag.children.size());
+    	assertEquals("Test creating a DAG object with no nodes",0, dag.parents.size());
+    	assertEquals("Test creating a DAG object with no nodes",0, dag.depth.size());
+    	
+    	
+    	// Test finding LCA of empty DAG
+    	assertEquals("Test finding LCA of empty DAG",null, dag.findLCA("A","A"));
+    	
+    	
+    	// Test finding LCA of DAG with one node
+    	dag.insertInto("A", null, null);
+    	assertEquals("Test finding LCA of DAG with one element where target nodes are the root ","A", dag.findLCA("A","A"));
+    	assertEquals("Test finding LCA of DAG with one element where one node isnt in DAG ",null, dag.findLCA("A","Z"));
+    	assertEquals("Test finding LCA of DAG with one element where one node isnt in DAG ",null, dag.findLCA("Z","A"));
+    	
+    	
+    	// Test finding LCA of DAG with two elements
+    	dag = new DAG();
+    	dag.addEdge("A", "B");
+    	assertEquals("Test finding LCA of DAG with two elements","A", dag.findLCA("A","B"));
+    	assertEquals("Test finding LCA of DAG with two elements","B", dag.findLCA("B","B"));
+    	
+    	
+    	// Test finding LCA of DAG with multiple elements
+    	dag.addEdge("A", "C");
+    	dag.addEdge("A", "D");
+    	dag.addEdge("B", "G");
+    	dag.addEdge("B", "E");
+    	dag.addEdge("C", "E");
+    	dag.addEdge("C", "F");
+    	dag.addEdge("D", "F");
+    	dag.addEdge("E", "G");
+    	dag.addEdge("E", "H");
+    	dag.addEdge("F", "H");
+    	
+    	assertEquals("LCA(B,C) = A","A", dag.findLCA("B","C"));
+    	assertEquals("LCA(B,D) = A","A", dag.findLCA("B","D"));
+    	assertEquals("LCA(C,D) = A","A", dag.findLCA("C","D"));
+    	assertEquals("LCA(B,E) = B","B", dag.findLCA("B","E"));
+    	assertEquals("LCA(C,E) = C","C", dag.findLCA("C","E"));
+    	assertEquals("LCA(C,F) = C","C", dag.findLCA("C","F"));
+    	assertEquals("LCA(E,D) = A","A", dag.findLCA("E","D"));
+    	assertEquals("LCA(G,H) = E","E", dag.findLCA("G","H"));
+    	assertEquals("LCA(G,F) = C","C", dag.findLCA("G","F"));
+    	assertEquals("LCA(F,B) = A","A", dag.findLCA("F","B"));
+    	assertEquals("LCA(H,C) = C","C", dag.findLCA("H","C"));
+    	
+    	
+    	// Test finding LCA of DAG with unusual structure 
+    	dag = new DAG();
+    	dag.addEdge("A", "B");
+    	dag.addEdge("B", "C");
+    	dag.addEdge("C", "D");
+    	dag.addEdge("D", "E");
+    	
+    	assertEquals("LCA(A,B) = A","A", dag.findLCA("A","B"));
+    	assertEquals("LCA(C,B) = B","B", dag.findLCA("C","B"));
+    	assertEquals("LCA(E,E) = E","E", dag.findLCA("E","E"));
+    	assertEquals("LCA(A,E) = A","A", dag.findLCA("A","E"));
+    	
+
     }
 
     
     
 	@Test
+
 	void testFindPath() {
 		// findPath(Node root, int target, ArrayList<Integer> pathArr)
 		LCA lca = new LCA();

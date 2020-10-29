@@ -1,4 +1,143 @@
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+
+
+class DAG{
+	public Map<String, Integer> node_map;
+	public ArrayList<HashSet<String>> parents;
+	public ArrayList<HashSet<String>> children;
+	public ArrayList<Integer> depth;
+	public int currentIndex = -1;
+	
+	public DAG() {
+		this.node_map = new HashMap<String, Integer>();
+		this.parents = new ArrayList<HashSet<String>>();
+		this.children = new ArrayList<HashSet<String>>();
+		this.depth = new ArrayList<Integer>();
+	}
+	
+	public boolean insertInto(String node, String parent, String child) {
+		
+		// First check to see if the node has already been inserted into the hashmap
+		if (!this.node_map.containsKey(node)) {
+			
+			// Allocate the index that will be used for contents of this node
+			this.currentIndex++;
+			
+			
+			// Then add the node to the node map
+			this.node_map.put(node, this.currentIndex);
+			
+			
+			// Create a hashset for storing parents and add it to the correct index in the parents array
+			HashSet<String> pars = new HashSet<String>();
+			if (parent != null) {
+				pars.add(parent);
+				this.depth.add(this.currentIndex, 1 + this.depth.get(this.node_map.get(parent)));
+			}
+			else {
+				this.depth.add(this.currentIndex, 0);;
+			}
+			this.parents.add(this.currentIndex, pars);
+			
+			
+			// Do similar for the children array
+			HashSet<String> childs = new HashSet<String>();
+			if (child != null) { childs.add(child);}
+			this.children.add(this.currentIndex, childs);
+			
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	
+	
+	public void addEdge(String parent, String child) {
+		
+		// See if we are able to insert the parent node into our data structures
+		if (!insertInto(parent, null, child)) {
+			// Parent exists so add child to its children set
+			int index = this.node_map.get(parent);
+			this.children.get(index).add(child);
+		}
+		
+		
+		// See if we are able to insert the child into our data structures
+		if (!insertInto(child, parent, null)) {
+			// The child exists so add the parent to its parents set
+			int index = this.node_map.get(child);
+			this.parents.get(index).add(parent);
+		}
+		
+	}
+	
+	
+	
+	// Recursively get all the predecessors of a given node
+	public void recursiveSearch(String node, HashSet<String> nodeSet) {
+		nodeSet.add(node);
+		// Loop through all the parents of this node and add them to the node set
+		for (String parentNode: this.parents.get(this.node_map.get(node))) {
+			nodeSet.add(parentNode);
+			recursiveSearch(parentNode, nodeSet);
+		}
+	}
+	
+	
+	
+	// Find the LCA of two nodes contained in the DAG graph
+	public String findLCA(String firstNode, String secondNode) {
+		HashSet<String> firstPath = new HashSet<String>();
+		HashSet<String> secondPath = new HashSet<String>();
+		
+		// Check to make sure first target and second target nodes are in the graph
+		if (!this.node_map.containsKey(firstNode) || !this.node_map.containsKey(secondNode)) {
+			return null;
+		}
+		else {
+			
+			// Get all the nodes that are predecessors of each target node
+			recursiveSearch(firstNode, firstPath);
+			recursiveSearch(secondNode, secondPath);
+			
+			
+			// Only keep the path nodes which are common to both target nodes
+			firstPath.retainAll(secondPath);
+			
+			
+			// Finally loop through all the remaining nodes and return the common node with the largest depth
+			int largest = -1;
+			String returnNode = null;
+			for (String node: firstPath) {
+				int depth = this.depth.get(this.node_map.get(node));
+				if (depth > largest) {
+					largest = depth;
+					returnNode = node;
+				}
+			}
+			
+			return returnNode;
+		}
+	}
+	
+	
+	
+	public void displayTable() {
+		System.out.println("Nodes: "+this.node_map.keySet());
+		System.out.println("Parents: "+this.parents.toString());
+		System.out.println("Children: "+this.children.toString());
+		System.out.println("Depth: "+this.depth.toString());
+	}
+	
+}
+
+
 
 class Node{
 	public int key;
@@ -187,4 +326,5 @@ public class LCA {
 		
 		return -1;
 	}
+
 }
